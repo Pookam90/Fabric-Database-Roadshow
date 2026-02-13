@@ -2,13 +2,13 @@
 <img src="img/Banner-ignite-25.png" alt="decorative banner" width="1200"/>
 </p>
 
-# [Microsoft Ignite 2025](https://ignite.microsoft.com)
+# [Microsoft Fabric and Databases Roadshow - SQL DB Labs](https://msevents.microsoft.com/event?id=58506505)
 
-## 🔥LAB533: Develop Scalable Data Solutions with SQL Database in Microsoft Fabric
+## 🔥Lab: Develop Scalable Data Solutions with SQL Database in Microsoft Fabric
 
-Download the session's slide [deck here](https://igniteanalyticspreday.blob.core.windows.net/slidedeck/Ignite25-Labs-SQL%20in%20Fabric.pptx)
+Download the session's slide [deck here]()
 
-Welcome to the comprehensive hands-on lab for Microsoft Ignite 2025! This lab will guide you through building end-to-end AI-ready applications using SQL database in Microsoft Fabric as the core data backbone.
+Welcome to the comprehensive hands-on lab for Microsoft Fabric and Databases Roadshow! This lab will guide you through building end-to-end AI-ready applications using SQL database in Microsoft Fabric as the core data backbone.
 
 ## Lab Overview
 
@@ -64,17 +64,17 @@ This lab is organized into five progressive modules:
 Before starting this lab, ensure you have:
 
 - Access to Microsoft Fabric workspace
-- Azure OpenAI Service deployment (provided in lab environment)
+- Azure OpenAI Service deployment 
 - Basic understanding of SQL and T-SQL syntax
 - Familiarity with Microsoft Power BI (helpful but not required)
 
-## Lab Environment
+## Lab Pre-reqs
 
-The lab uses a pre-configured environment with:
+The lab needs the following pre-requistes setup 
 - **Microsoft Fabric workspace** with SQL database capabilities
 - **Azure OpenAI Service** with GPT-4 and text-embedding-ada-002 deployments
 - **Sample AdventureWorks data** for realistic scenarios
-- **Pre-built templates and scripts** for quick setup 
+- **Pre-built templates and scripts** for quick setup - available in this repo
 
 ## Key Technologies Explored
 
@@ -123,32 +123,12 @@ To begin the lab:
 
 | Resources          | Links                             | Description        |
 |:-------------------|:----------------------------------|:-------------------|
-| Ignite 2025 Next Steps | [https://aka.ms/Ignite25-Next-Steps](https://aka.ms/Ignite25-Next-Steps?ocid=ignite25_nextsteps_cnl) | Links to all repos for Ignite 2025 Sessions |
 | What is Microsoft Fabric? | [https://aka.ms/WhatIsMicrosoftFabric](https://aka.ms/WhatIsMicrosoftFabric) | Overview of Microsoft Fabric |
 | Get started with Microsoft Fabric | [https://aka.ms/MicrosoftFabric](https://aka.ms/MicrosoftFabric)| Microsoft Fabric Learning Path |
-| Learn at Ignite | [https://aka.ms/LearnAtIgnite](https://aka.ms/LearnAtIgnite?ocid=ignite25_nextsteps_github_cnl) | Continue learning on Microsoft Learn |
 | Microsoft Foundry Discord | [https://aka.ms/MicrosoftFoundry-Ignite25](https://aka.ms/MicrosoftFoundry-Ignite25) | Join our community |
 | Microsoft Foundry Developer Forum | [https://aka.ms/MicrosoftFoundryForum-Ignite25](https://aka.ms/MicrosoftFoundryForum-Ignite25) | Ask questions |
 | Reddit | [https://reddit.com/r/MicrosoftFabric](https://reddit.com/r/MicrosoftFabric)| Microsoft Fabric Reddit Community |
 
-## Content Owners
-<table>
-<tr>
-    <td align="center"><a href="https://github.com/im-microsoft">
-        <img src="https://github.com/im-microsoft.png" width="100px;" alt="Idris Motiwala"
-"/><br />
-        <sub><b> Idris Motiwala
-</b></sub></a><br />
-            <a href="https://github.com/im-microsoft" title="talk">📢</a> 
-    </td>
-    <td align="center"><a href="https://github.com/sukkaur">
-        <img src="https://github.com/sukkaur.png" width="100px;" alt="Sukhwant Kaur
-"/><br />
-        <sub><b>Sukhwant Kaur
-</b></sub></a><br />
-            <a href="https://github.com/sukkaur" title="talk">📢</a> 
-    </td>
-</tr></table>
 
 ## 🚀 Try Azure for Free!
 

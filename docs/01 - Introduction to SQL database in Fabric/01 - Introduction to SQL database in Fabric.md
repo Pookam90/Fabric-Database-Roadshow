@@ -24,9 +24,9 @@ In this section of the lab, we will be logging into the Microsoft Fabric Portal 
 
 Using a web browser of your choice, please navigate to this `https://app.fabric.microsoft.com/home`.
 
-1. Enter your AAD Username `@lab.CloudPortalCredential(User1).Username` in the Email field, then click on the Submit button.
+1. Enter your  Username  in the Email field, then click on the Submit button.
 
-2. Enter your password `@lab.CloudPortalCredential(User1).AccessToken` and click on the Sign in button. 
+2. Enter your password and click on the Sign in button. 
 
 3. If prompted with "Stay signed in?" select "Yes" and proceed.
 
@@ -40,7 +40,7 @@ Using a web browser of your choice, please navigate to this `https://app.fabric.
 1. Click a **New Workspace tile** on the  mid-left side of the screen. 
 ![A picture of the Microsoft Fabric developer experience Home Page](NewWorkspace.png)
    
-2. Please enter ```Fabric@lab.LabInstance.Id``` as the Fabric workspace name.
+2. Please enter ```FabricSQLDBLab``` as the Fabric workspace name.
 ![A picture of the Create a workspace blade on the right side of the page](CreateWorkspace.png) 
     
 

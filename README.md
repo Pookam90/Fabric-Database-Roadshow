@@ -3,8 +3,6 @@
 
 ## 🔥Lab: Develop Scalable Data Solutions with SQL Database in Microsoft Fabric
 
-Download the session's slide [deck here]()
-
 Welcome to the comprehensive hands-on lab for Microsoft Fabric and Databases Roadshow! This lab will guide you through building end-to-end AI-ready applications using SQL database in Microsoft Fabric as the core data backbone.
 
 ## Lab Overview

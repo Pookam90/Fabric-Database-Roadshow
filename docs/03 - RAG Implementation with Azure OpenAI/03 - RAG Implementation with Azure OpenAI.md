@@ -38,10 +38,10 @@ WITH (
     MODEL = 'text-embedding-3-small',
     CREDENTIAL = [https://demovectorinternal.openai.azure.com/]
 );
-
-!["A picture of Azure portal showing the Endpoint to use for the Database Scoped Credential"](../../img/graphics/Introduction/endpoint.png)
-
  ```
+
+ !["A picture of Azure portal showing the Endpoint to use for the Database Scoped Credential"](../../img/graphics/Introduction/endpoint.png)
+
 
 ## Creating embeddings for relational data
 
@@ -103,8 +103,6 @@ CROSS APPLY (
            ON d.ProductID = p.ProductID AND d.Culture = 'en'
     WHERE c.ProductCategoryID = p.ProductCategoryID
 ) AS x;
-
-
 ```
 
 4. To ensure all the embeddings were created, run the following code in a new query window: 
@@ -146,8 +144,7 @@ You will be using this function in samples as well as in the RAG chat applicatio
 
 1. The first query will pose the question "I am looking for a red bike and I dont want to spend a lot". The key words that should help with our similarity search are red, bike, and dont want to spend a lot. Run the following SQL in a new query window:
 
-    ```SQL
-
+```SQL
 DECLARE @search_text NVARCHAR(MAX) = N'looking for a red bike and i dont want to spend a lot';
 DECLARE @search_vector VECTOR(1536);
 
@@ -167,31 +164,26 @@ SELECT TOP (4)
     ) AS distance
 FROM [SalesLT].[Product] p
 ORDER BY distance;
-    ```
+```
+Results show that the search found exactly that, an affordable red bike. The distance column shows us how similar it found the results to be using VECTOR_DISTANCE, with a lower score being a better match.
 
-    Results show that the search found exactly that, an affordable red bike. The distance column shows us how similar it found the results to be using VECTOR_DISTANCE, with a lower score being a better match.
+**Results**
 
-   **Results**
-
-    | ProductID | Name | chunk | distance |
-    |:---------|:---------|:---------|:---------|
-    | 763 | Road-650 Red, 48 | Road-650 Red, 48 Red Road Bikes Road-650 Value-priced bike with many features of our top-of-the-line models. Has the same light, stiff frame, and the quick acceleration we're famous for. | 0.16352240013483477 |
-    | 760 | Road-650 Red, 60 | Road-650 Red, 60 Red Road Bikes Road-650 Value-priced bike with many features of our top-of-the-line models. Has the same light, stiff frame, and the quick acceleration we're famous for. | 0.16361482158949225 |
-    | 759 | Road-650 Red, 58 | Road-650 Red, 58 Red Road Bikes Road-650 Value-priced bike with many features of our top-of-the-line models. Has the same light, stiff frame, and the quick acceleration we're famous for. | 0.16432339626539993 |
-    | 762 | Road-650 Red, 44 | Road-650 Red, 44 Red Road Bikes Road-650 Value-priced bike with many features of our top-of-the-line models. Has the same light, stiff frame, and the quick acceleration we're famous for. | 0.1652894865541471 |
-    !["A picture of running Query 1 and getting results outlined in the Query 1 results table." ](../../img/graphics/2025-01-15_6.36.01_AM.png)
+| ProductID | Name | chunk | distance |
+|:---------|:---------|:---------|:---------|
+| 763 | Road-650 Red, 48 | Road-650 Red, 48 Red Road Bikes Road-650 Value-priced bike with many features of our top-of-the-line models. Has the same light, stiff frame, and the quick acceleration we're famous for. | 0.16352240013483477 |
+| 760 | Road-650 Red, 60 | Road-650 Red, 60 Red Road Bikes Road-650 Value-priced bike with many features of our top-of-the-line models. Has the same light, stiff frame, and the quick acceleration we're famous for. | 0.16361482158949225 |
+| 759 | Road-650 Red, 58 | Road-650 Red, 58 Red Road Bikes Road-650 Value-priced bike with many features of our top-of-the-line models. Has the same light, stiff frame, and the quick acceleration we're famous for. | 0.16432339626539993 |
+| 762 | Road-650 Red, 44 | Road-650 Red, 44 Red Road Bikes Road-650 Value-priced bike with many features of our top-of-the-line models. Has the same light, stiff frame, and the quick acceleration we're famous for. | 0.1652894865541471 |
+!["A picture of running Query 1 and getting results outlined in the Query 1 results table." ](../../img/graphics/2025-01-15_6.36.01_AM.png)
 
 2. In the previous example, we were clear on what we were looking for; cheap red bike. In this next example, you are going to have the search flex its AI muscles a bit by saying we want a bike seat that needs to be good on trails. This will require the search to look for adjacent values that have something in common with trails. 
 Run the below SQL in a new query window.
 
     
-
-    ```SQL
-    DECLARE @search_text nvarchar(max) = N'Do you sell any padded seats that are good on trails?';
-
-
+```SQL
+DECLARE @search_text nvarchar(max) = N'Do you sell any padded seats that are good on trails?';
 DECLARE @search_vector vector(1536);
-
 SELECT @search_vector = x.embeddings
 FROM (
     SELECT [embeddings] = AI_GENERATE_EMBEDDINGS(@search_text USE MODEL SalesLT_AOAI_Embeddings)
@@ -209,25 +201,23 @@ SELECT TOP (4)
 FROM [SalesLT].[Product] AS p
 WHERE p.embeddings IS NOT NULL
 ORDER BY distance;
+```
 
-    ```
+These results are very interesting for it found products based on word meanings such as absorb shocks and bumps and foam-padded. It was able to make connections to riding conditions on trails and find products that would fit that need.
 
-    These results are very interesting for it found products based on word meanings such as absorb shocks and bumps and foam-padded. It was able to make connections to riding conditions on trails and find products that would fit that need.
+**Search Results**
 
-    **Search Results**
-
-    | Name | chunk | distance |
-    |:---------|:---------|:---------|
-    | ML Mountain Seat/Saddle | ML Mountain Seat/Saddle No Color Saddles ML Mountain Seat/Saddle 2 Designed to absorb shock. | 0.17265341238606102 |
-    | LL Road Seat/Saddle | LL Road Seat/Saddle No Color Saddles LL Road Seat/Saddle 1 Lightweight foam-padded saddle. | 0.17667274723850412 |
-    | ML Road Seat/Saddle | ML Road Seat/Saddle No Color Saddles ML Road Seat/Saddle 2 Rubber bumpers absorb bumps. | 0.18802953111711573 |
-    | HL Mountain Seat/Saddle | HL Mountain Seat/Saddle No Color Saddles HL Mountain Seat/Saddle 2 Anatomic design for a full-day of riding in comfort. Durable leather. | 0.18931317298732764 |
-    !["A picture of running Query 3 and getting results outlined in the Query 3 results table"](../../img/graphics/2025-01-15_6.38.06_AM.png)
+| Name | chunk | distance |
+|:---------|:---------|:---------|
+| ML Mountain Seat/Saddle | ML Mountain Seat/Saddle No Color Saddles ML Mountain Seat/Saddle 2 Designed to absorb shock. | 0.17265341238606102 |
+| LL Road Seat/Saddle | LL Road Seat/Saddle No Color Saddles LL Road Seat/Saddle 1 Lightweight foam-padded saddle. | 0.17667274723850412 |
+| ML Road Seat/Saddle | ML Road Seat/Saddle No Color Saddles ML Road Seat/Saddle 2 Rubber bumpers absorb bumps. | 0.18802953111711573 |
+| HL Mountain Seat/Saddle | HL Mountain Seat/Saddle No Color Saddles HL Mountain Seat/Saddle 2 Anatomic design for a full-day of riding in comfort. Durable leather. | 0.18931317298732764 |
+!["A picture of running Query 3 and getting results outlined in the Query 3 results table"](../../img/graphics/2025-01-15_6.38.06_AM.png)
 
 3. Create a new stored procedure to find products. Copy and Paste the below code in a new query window and click Run:
 
-    ```SQL
-
+```SQL
     CREATE OR ALTER PROCEDURE [SalesLT].[find_products]
     @text nvarchar(max),
     @top int = 10,
@@ -240,9 +230,7 @@ BEGIN
         RETURN;
 
     DECLARE @qv vector(1536);
-
     SET @qv = AI_GENERATE_EMBEDDINGS(@text USE MODEL SalesLT_AOAI_Embeddings);
-
     IF (@qv IS NULL)
         RETURN;
 
@@ -282,13 +270,13 @@ BEGIN
     ORDER BY distance ASC;
 END;
 GO
-    ```
+```
 
 4. Next, you need to encapsulate the **STORED PROCEDURE** into a wrapper so that the result set can be utilized by our GraphQL endpoint. Using the **WITH RESULT SET** syntax allows you to change the names and data types of the returning result set. This is needed in this example because the usage of sp_invoke_external_rest_endpoint and the return output from extended stored procedures 
 
-    Copy and Paste the below code in a new query window and click Run:  
+Copy and Paste the below code in a new query window and click Run:  
 
-    ```SQL
+```SQL
 CREATE OR ALTER PROCEDURE [SalesLT].[find_products_api]
     @text nvarchar(max),
     @top int = 10,
@@ -316,14 +304,14 @@ BEGIN
     );
 END;
 GO
-    ```
+```
 
 5. Let us test this newly created procedure to see the results by running the following SQL in a new query window:
 
-    ```SQL
-    exec SalesLT.find_products_api 'I am looking for a red bike'
-    ```
-    !["A picture of running the find_products_api stored procedure"](../../img/graphics/2025-01-14_6.57.09_AM.png)
+```SQL
+exec SalesLT.find_products_api 'I am looking for a red bike'
+```
+!["A picture of running the find_products_api stored procedure"](../../img/graphics/2025-01-14_6.57.09_AM.png)
 
 Congratulations! In this module, you learned how to build a RAG application using SQL database in fabric, and Azure OpenAI. You explored generating vector embeddings for relational data, performing semantic similarity searches with SQL.
 

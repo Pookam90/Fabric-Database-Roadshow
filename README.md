@@ -1,6 +1,3 @@
-<p align="center">
-<img src="img/Banner-ignite-25.png" alt="decorative banner" width="1200"/>
-</p>
 
 # [Microsoft Fabric and Databases Roadshow - SQL DB Labs](https://msevents.microsoft.com/event?id=58506505)
 

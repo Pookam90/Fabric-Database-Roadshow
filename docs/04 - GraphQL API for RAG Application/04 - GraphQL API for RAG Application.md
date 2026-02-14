@@ -15,6 +15,8 @@ Let's create a new stored procedure to create a new flow that not only uses vect
 
 
 ```SQL
+    
+
     CREATE OR ALTER PROCEDURE [SalesLT].[prompt_answer]
     @user_question nvarchar(max),
     @products nvarchar(max),
@@ -22,7 +24,7 @@ Let's create a new stored procedure to create a new flow that not only uses vect
 
     AS
 
-    DECLARE @url nvarchar(4000) = '@lab.CloudResourceTemplate(Lab533Resources).Outputs[openAIEndpoint]openai/deployments/gpt-4.1/chat/completions?api-version=2024-06-01';
+    DECLARE @url nvarchar(4000) = 'https://demovectorinternal.openai.azure.com/openai/deployments/chatcompletion/chat/completions?api-version=2025-01-01-preview';
     DECLARE @payload nvarchar(max) = N'{
         "messages": [
             {
@@ -39,20 +41,16 @@ Let's create a new stored procedure to create a new flow that not only uses vect
             }
         ]
     }';
+DECLARE @ret int, @response nvarchar(max);
+EXEC @ret = sp_invoke_external_rest_endpoint
+     @url        = N'https://demovectorinternal.openai.azure.com/openai/deployments/chatcompletion/chat/completions?api-version=2025-01-01-preview',
+     @method     = 'POST',
+     @payload    = @payload,
+     @credential = N'https://demovectorinternal.openai.azure.com/',
+     @timeout    = 230,
+     @response   = @response OUTPUT;
 
-    DECLARE @ret int, @response nvarchar(max);
-
-    exec @ret = sp_invoke_external_rest_endpoint
-        @url = @url,
-        @method = 'POST', 
-        @payload = @payload,
-        @credential = [@lab.CloudResourceTemplate(Lab533Resources).Outputs[openAIEndpoint]],    
-        @timeout = 230,
-        @response = @response output;
-
-    select json_value(@response, '$.result.choices[0].message.content');
-
-    GO
+SELECT @ret AS ReturnCode, @response AS Response;
 
 ```
 

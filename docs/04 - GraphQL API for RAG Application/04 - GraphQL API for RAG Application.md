@@ -19,38 +19,45 @@ Let's create a new stored procedure to create a new flow that not only uses vect
 
     CREATE OR ALTER PROCEDURE [SalesLT].[prompt_answer]
     @user_question nvarchar(max),
-    @products nvarchar(max),
-    @answer nvarchar(max) output
+    @products      nvarchar(max),
+    @answer        nvarchar(max) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
 
-    AS
+    IF (@user_question IS NULL OR LTRIM(RTRIM(@user_question)) = N'') RETURN;
 
-    DECLARE @url nvarchar(4000) = 'https://demovectorinternal.openai.azure.com/openai/deployments/chatcompletion/chat/completions?api-version=2025-01-01-preview';
-    DECLARE @payload nvarchar(max) = N'{
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are a sales assistant who helps customers find the right products for their question and activities."
-            },
-            {
-                "role": "user",
-                "content": "The products available are the following: ' + @products + '"
-            },
-            {
-                "role": "user",
-                "content": " ' + @user_question + '"
-            }
-        ]
+    -- Avoid NULL concatenation nuking the whole payload
+    SET @products = COALESCE(@products, N'');
+
+    DECLARE @payload  nvarchar(max),
+            @ret      int,
+            @response nvarchar(max);
+
+    -- Escape user-provided text to keep JSON valid
+    DECLARE @q nvarchar(max) = STRING_ESCAPE(@user_question, 'json');
+    DECLARE @p nvarchar(max) = STRING_ESCAPE(@products, 'json');
+
+    SET @payload = N'{
+      "messages": [
+        { "role": "system", "content": "You are a sales assistant who helps customers find the right products for their question and activities." },
+        { "role": "user", "content": "The products available are the following: ' + @p + N'" },
+        { "role": "user", "content": "' + @q + N'" }
+      ]
     }';
-DECLARE @ret int, @response nvarchar(max);
-EXEC @ret = sp_invoke_external_rest_endpoint
-     @url        = N'https://demovectorinternal.openai.azure.com/openai/deployments/chatcompletion/chat/completions?api-version=2025-01-01-preview',
-     @method     = 'POST',
-     @payload    = @payload,
-     @credential = N'https://demovectorinternal.openai.azure.com/',
-     @timeout    = 230,
-     @response   = @response OUTPUT;
 
-SELECT @ret AS ReturnCode, @response AS Response;
+    EXEC @ret = sp_invoke_external_rest_endpoint
+        @url        = N'https://demovectorinternal.openai.azure.com/openai/deployments/chatcompletion/chat/completions?api-version=2025-01-01-preview',
+        @method     = N'POST',
+        @payload    = @payload,
+        @credential = N'https://demovectorinternal.openai.azure.com/',
+        @timeout    = 230,
+        @response   = @response OUTPUT;
+
+    IF (@ret = 0)
+        SET @answer = JSON_VALUE(@response, '$.result.choices[0].message.content');
+END
+GO
 
 ```
 

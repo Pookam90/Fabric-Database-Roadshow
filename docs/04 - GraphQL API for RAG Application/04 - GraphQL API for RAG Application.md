@@ -27,7 +27,7 @@ BEGIN
 
     IF (@user_question IS NULL OR LTRIM(RTRIM(@user_question)) = N'') RETURN;
 
-    -- Avoid NULL concatenation nuking the whole payload
+    -- Avoid NULL concatenation 
     SET @products = COALESCE(@products, N'');
 
     DECLARE @payload  nvarchar(max),
@@ -67,56 +67,70 @@ GO
 
 
     ```SQL
-    CREATE or ALTER procedure [SalesLT].[find_products_chat]
-    @text nvarchar(max),
-    @top int = 3,
-    @min_similarity decimal(19,16) = 0.70
-    AS
-    if (@text is null) return;
-    DECLARE @retval int, @qv vector(1536), @products_json nvarchar(max), @answer nvarchar(max);
-    exec @retval = SalesLT.create_embeddings @text, @qv output;
-    if (@retval != 0) return;
-    with vector_results as (
-    SELECT 
-            p.Name as product_name,
-            ISNULL(p.Color,'No Color') as product_color,
-            c.Name as category_name,
-            m.Name as model_name,
-            d.Description as product_description,
-            p.ListPrice as list_price,
-            p.weight as product_weight,
-            vector_distance('cosine', @qv, p.embeddings) AS distance
-    FROM
-        [SalesLT].[Product] p,
-        [SalesLT].[ProductCategory] c,
-        [SalesLT].[ProductModel] m,
-        [SalesLT].[vProductAndDescription] d
-    WHERE p.ProductID = d.ProductID
-    AND p.ProductCategoryID = c.ProductCategoryID
-    AND p.ProductModelID = m.ProductModelID
-    AND p.ProductID = d.ProductID
-    AND d.Culture = 'en')
+    CREATE OR ALTER PROCEDURE [SalesLT].[find_products_chat]
+  @text nvarchar(max),
+  @top int = 3,
+  @min_similarity decimal(19,16) = 0.50
+AS
+BEGIN
+  SET NOCOUNT ON;
+  IF (@text IS NULL OR LTRIM(RTRIM(@text)) = N'') RETURN;
+
+  DECLARE @qv vector(1536),
+          @products_text nvarchar(max),
+          @answer nvarchar(max);
+
+  -- Inline embedding generation 
+  SELECT @qv = AI_GENERATE_EMBEDDINGS(@text USE MODEL [SalesLT_AOAI_Embeddings]); 
+  IF (@qv IS NULL) RETURN;
+
+  ;WITH vector_results AS (
     SELECT
-    top(@top)
-    @products_json = (STRING_AGG (CONVERT(NVARCHAR(max),CONCAT( 
-                                    product_name, ' ' ,
-                                    product_color, ' ',
-                                    category_name, ' ', 
-                                    model_name, ' ', 
-                                    product_description, ' ',
-                                    list_price, ' ',
-                                    product_weight )), CHAR(13)))
+      p.Name AS product_name,
+      ISNULL(p.Color,'No Color') AS product_color,
+      c.Name AS category_name,
+      m.Name AS model_name,
+      d.Description AS product_description,
+      p.ListPrice AS list_price,
+      p.Weight AS product_weight,
+      VECTOR_DISTANCE('cosine', @qv, p.embeddings) AS distance
+    FROM [SalesLT].[Product] p
+    JOIN [SalesLT].[vProductAndDescription] d ON p.ProductID = d.ProductID
+    JOIN [SalesLT].[ProductCategory] c ON p.ProductCategoryID = c.ProductCategoryID
+    JOIN [SalesLT].[ProductModel] m ON p.ProductModelID = m.ProductModelID
+    WHERE d.Culture = 'en'
+      AND p.embeddings IS NOT NULL
+  ),
+  topk AS (
+    SELECT TOP (@top) *
     FROM vector_results
-    WHERE (1-distance) > @min_similarity
-    GROUP BY  distance
-    ORDER BY    
-        distance asc;
+    WHERE (1 - distance) > @min_similarity
+    ORDER BY distance ASC
+  )
+  SELECT @products_text =
+    COALESCE(
+      STRING_AGG(
+        CONCAT(
+          'Name: ', product_name,
+          ', Color: ', product_color,
+          ', Category: ', category_name,
+          ', Model: ', model_name,
+          ', Price: ', CONVERT(nvarchar(40), list_price),
+          ', Weight: ', CONVERT(nvarchar(40), product_weight),
+          ', Similarity: ', CONVERT(nvarchar(40), (1 - distance)),
+          ', Description: ', COALESCE(product_description,'')
+        ),
+        CHAR(10)
+      ),
+      N'No matching products found.'
+    )
+  FROM topk;
 
-    SET @products_json = (select REPLACE(REPLACE(@products_json, CHAR(13), ' , '), CHAR(10), ' , '));
+  EXEC [SalesLT].[prompt_answer] @text, @products_text, @answer OUTPUT;
 
-    exec [SalesLT].[prompt_answer] @text, @products_json, @answer output;
-
-    GO
+  SELECT @answer AS [answer];
+END
+GO
     ```
 
 3. The last step before we can create a **GraphQL** endpoint is to wrap the new find products chat stored procedure.
@@ -124,17 +138,21 @@ GO
     Copy/Paste the below T-SQL Code in a new query window and Run the code:
 
 ```SQL
- CREATE or ALTER Procedure SalesLT.[find_products_chat_api]
-        @text nvarchar(max)
-        AS 
-        exec SalesLT.find_products_chat @text
-        with RESULT SETS
-        (    
-            (    
-                answer NVARCHAR(max)
-            )
+ CREATE OR ALTER PROCEDURE SalesLT.[find_products_chat_api]
+    @text NVARCHAR(MAX)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    EXEC SalesLT.find_products_chat @text
+    WITH RESULT SETS
+    (
+        (
+            answer NVARCHAR(MAX)
         )
-    GO
+    );
+END
+GO
 ```
 
 4. You can test this new  procedure to see how Azure OpenAI will answer a question with product data.

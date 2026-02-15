@@ -16,7 +16,6 @@ Let's create a new stored procedure to create a new flow that not only uses vect
 
 ```SQL
     
-
     CREATE OR ALTER PROCEDURE [SalesLT].[prompt_answer]
     @user_question nvarchar(max),
     @products      nvarchar(max),
@@ -66,8 +65,8 @@ GO
     Copy/Paste the below T-SQL Code in a new query window and Run the code:
 
 
-    ```SQL
-    CREATE OR ALTER PROCEDURE [SalesLT].[find_products_chat]
+```SQL
+CREATE OR ALTER PROCEDURE [SalesLT].[find_products_chat]
   @text nvarchar(max),
   @top int = 3,
   @min_similarity decimal(19,16) = 0.50
@@ -131,7 +130,8 @@ BEGIN
   SELECT @answer AS [answer];
 END
 GO
-    ```
+
+```
 
 3. The last step before we can create a **GraphQL** endpoint is to wrap the new find products chat stored procedure.
 

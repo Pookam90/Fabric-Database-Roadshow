@@ -32,11 +32,11 @@ GO
 drop external model SalesLT_AOAI_Embeddings
 CREATE EXTERNAL MODEL SalesLT_AOAI_Embeddings
 WITH (
-    LOCATION = 'https://demovectorinternal.openai.azure.com/openai/deployments/pookamembedding/embeddings?api-version=2023-05-15', --update with your URL from Azure AI foundry
+    LOCATION = 'https://<yourdeplpymentname.openai.azure.com/openai/deployments/<yourmodelname>/embeddings?api-version=2023-05-15', --update with your URL from Azure AI foundry
     API_FORMAT = 'Azure OpenAI',
     MODEL_TYPE = EMBEDDINGS,
     MODEL = 'text-embedding-3-small',
-    CREDENTIAL = [https://demovectorinternal.openai.azure.com/]
+    CREDENTIAL = [https://<yourdeploymentname>.openai.azure.com/]
 );
  ```
 
